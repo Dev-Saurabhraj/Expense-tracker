@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 import '../../../Core/Colors/app_colors.dart';
 import '../../../Core/Constants/text_styles.dart';
 import '../../../Core/Icons/app_icons.dart';
-import '../../../Core/Widgets/custom_card.dart';
 import '../Bloc/transactions_bloc.dart';
 import 'widgets/shimmer_transaction_list.dart';
-import 'widgets/transaction_item.dart';
+import '../Widgets/transactions_list.dart';
+import '../Widgets/empty_transactions_state.dart';
+import '../../../Features/Dashboard/Widgets/pagination_controls.dart';
 
 class TransactionsScreen extends StatefulWidget {
   const TransactionsScreen({super.key});
@@ -45,20 +45,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
             return const ShimmerTransactionList(itemCount: 8);
           } else if (state is TransactionsLoaded) {
             if (state.transactions.isEmpty) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      AppIcons.transactions,
-                      size: 48,
-                      color: AppColors.border,
-                    ),
-                    const SizedBox(height: 16),
-                    Text('No transactions yet', style: AppTextStyles.bodyLarge),
-                  ],
-                ),
-              );
+              return const EmptyTransactionsState();
             }
 
             final totalItems = state.transactions.length;
@@ -72,88 +59,33 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
             return Column(
               children: [
-                Expanded(
-                  child: AnimationLimiter(
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: paginatedTransactions.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 12),
-                      itemBuilder: (context, index) {
-                        return AnimationConfiguration.staggeredList(
-                          position: index,
-                          duration: const Duration(milliseconds: 375),
-                          child: SlideAnimation(
-                            verticalOffset: 50.0,
-                            child: FadeInAnimation(
-                              child: TransactionItem(
-                                transaction: paginatedTransactions[index],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                TransactionsList(
+                  transactions: paginatedTransactions,
+                  isLoading: false,
                 ),
-                // Pagination controls
                 if (totalPages > 1)
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: currentPage > 1
-                              ? () {
-                                  setState(() {
-                                    currentPage--;
-                                  });
-                                }
-                              : null,
-                          icon: const Icon(Icons.chevron_left),
-                          label: const Text('Previous'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: currentPage > 1
-                                ? AppColors.primary
-                                : AppColors.border,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        CustomCard(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 8,
-                          ),
-                          child: Text(
-                            'Page $currentPage of $totalPages',
-                            style: AppTextStyles.bodyMedium,
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        ElevatedButton.icon(
-                          onPressed: currentPage < totalPages
-                              ? () {
-                                  setState(() {
-                                    currentPage++;
-                                  });
-                                }
-                              : null,
-                          icon: const Icon(Icons.chevron_right),
-                          label: const Text('Next'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: currentPage < totalPages
-                                ? AppColors.primary
-                                : AppColors.border,
-                          ),
-                        ),
-                      ],
-                    ),
+                  PaginationControls(
+                    currentPage: currentPage,
+                    totalPages: totalPages,
+                    onPreviousPressed: () {
+                      setState(() {
+                        currentPage--;
+                      });
+                    },
+                    onNextPressed: () {
+                      setState(() {
+                        currentPage++;
+                      });
+                    },
                   ),
               ],
             );
           }
           return const Center(child: Text('Error loading transactions'));
+        },
+      ),
+    );
+  }
         },
       ),
     );

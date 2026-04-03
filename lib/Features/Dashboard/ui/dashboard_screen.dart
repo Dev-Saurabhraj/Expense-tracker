@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../Core/Colors/app_colors.dart';
 import '../../../Core/Constants/text_styles.dart';
-import '../../../Core/Icons/app_icons.dart';
-import '../../../Core/Widgets/custom_card.dart';
-import '../../Transactions/ui/widgets/shimmer_transaction_list.dart';
-import '../../Transactions/ui/widgets/transaction_item.dart';
 import '../Bloc/dashboard_bloc.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import '../Widgets/balance_card.dart';
+import '../Widgets/recent_transactions_list.dart';
+import '../Widgets/pagination_controls.dart';
+import '../../Transactions/ui/widgets/shimmer_transaction_list.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -56,7 +56,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: FadeInAnimation(child: widget),
                     ),
                     children: [
-                      _BalanceCard(
+                      BalanceCard(
                         balance: state.totalBalance,
                         income: state.totalIncome,
                         expense: state.totalExpense,
@@ -64,83 +64,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       const SizedBox(height: 32),
                       Text('Recent Transactions', style: AppTextStyles.h3),
                       const SizedBox(height: 16),
-                      if (state.recentTransactions.isEmpty)
-                        Center(
-                          child: Padding(
-                            padding: const EdgeInsets.all(32.0),
-                            child: Text(
-                              'No recent activity',
-                              style: AppTextStyles.bodyMedium,
-                            ),
-                          ),
-                        )
-                      else
-                        Column(
-                          children: [
-                            ...paginatedTransactions.map(
-                              (tx) => Padding(
-                                padding: const EdgeInsets.only(bottom: 12.0),
-                                child: TransactionItem(transaction: tx),
-                              ),
-                            ),
-                            if (totalPages > 1) ...[
-                              const SizedBox(height: 24),
-                              Padding(
-                                padding: const EdgeInsets.all(16.0),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    ElevatedButton.icon(
-                                      onPressed: currentPage > 1
-                                          ? () {
-                                              setState(() {
-                                                currentPage--;
-                                              });
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.chevron_left),
-                                      label: const Text('Previous'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: currentPage > 1
-                                            ? AppColors.primary
-                                            : AppColors.border,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    CustomCard(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 8,
-                                      ),
-                                      child: Text(
-                                        'Page $currentPage of $totalPages',
-                                        style: AppTextStyles.bodyMedium,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 16),
-                                    ElevatedButton.icon(
-                                      onPressed: currentPage < totalPages
-                                          ? () {
-                                              setState(() {
-                                                currentPage++;
-                                              });
-                                            }
-                                          : null,
-                                      icon: const Icon(Icons.chevron_right),
-                                      label: const Text('Next'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            currentPage < totalPages
-                                            ? AppColors.primary
-                                            : AppColors.border,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ],
+                      RecentTransactionsList(
+                        transactions: paginatedTransactions,
+                        isLoading: false,
+                      ),
+                      if (totalPages > 1) ...[
+                        const SizedBox(height: 24),
+                        PaginationControls(
+                          currentPage: currentPage,
+                          totalPages: totalPages,
+                          onPreviousPressed: () {
+                            setState(() {
+                              currentPage--;
+                            });
+                          },
+                          onNextPressed: () {
+                            setState(() {
+                              currentPage++;
+                            });
+                          },
                         ),
+                      ],
                     ],
                   ),
                 ),
@@ -152,90 +96,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-}
-
-class _BalanceCard extends StatelessWidget {
-  final double balance;
-  final double income;
-  final double expense;
-
-  const _BalanceCard({
-    required this.balance,
-    required this.income,
-    required this.expense,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomCard(
-      backgroundColor: AppColors.primary,
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Total Balance',
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.surface.withOpacity(0.8),
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '\$${balance.toStringAsFixed(2)}',
-            style: AppTextStyles.h1.copyWith(
-              color: AppColors.surface,
-              fontSize: 40,
-            ),
-          ),
-          const SizedBox(height: 32),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildStat(title: 'Income', amount: income, isIncome: true),
-              _buildStat(title: 'Expenses', amount: expense, isIncome: false),
-            ],
-          ),
-        ],
+        },
       ),
-    );
-  }
-
-  Widget _buildStat({
-    required String title,
-    required double amount,
-    required bool isIncome,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: AppColors.surface.withOpacity(0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            isIncome ? AppIcons.income : AppIcons.expense,
-            color: AppColors.surface,
-            size: 16,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.surface.withOpacity(0.8),
-              ),
-            ),
-            Text(
-              '\$${amount.toStringAsFixed(2)}',
-              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.surface),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
