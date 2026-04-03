@@ -86,8 +86,4 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       ),
     );
   }
-        },
-      ),
-    );
-  }
-}
+        }
