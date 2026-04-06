@@ -7,7 +7,7 @@ import '../Bloc/dashboard_bloc.dart';
 import '../Widgets/balance_card.dart';
 import '../Widgets/recent_transactions_list.dart';
 import '../Widgets/pagination_controls.dart';
-import '../../Transactions/ui/widgets/shimmer_transaction_list.dart';
+import '../../Transactions/widgets/shimmer_transaction_list.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});

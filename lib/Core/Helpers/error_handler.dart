@@ -52,9 +52,6 @@ class ErrorHandler {
     StackTrace? stackTrace, {
     String? context,
   }) {
-    final message = context != null
-        ? '$context: $exception'
-        : exception.toString();
     LoggerUtils.logException(exception, stackTrace, tag: _tag);
   }
 }

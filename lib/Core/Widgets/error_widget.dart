@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../Colors/app_colors.dart';
 import '../Constants/text_styles.dart';
 
-/// Error widget for displaying error messages
+// widget error messages
 class ErrorWidget extends StatelessWidget {
   final String message;
   final String? title;
@@ -63,7 +63,7 @@ class ErrorWidget extends StatelessWidget {
   }
 }
 
-/// Error snackbar display
+
 class ErrorSnackbar {
   static void show(
     BuildContext context,
