@@ -228,9 +228,9 @@ Output location: `build/app/outputs/flutter-apk/app-release.apk`
 
 ## 📥 Download APK
 
-**Latest APK Build**: [Download from Google Drive](https://drive.google.com/drive/folders/YOUR_DRIVE_LINK_HERE)
+**Latest APK Build**: [Download from Google Drive](https://drive.google.com/file/d/1h-0lYYquiqdX2H22bI-IiQ7u2lWENehR/view?usp=drive_link)
 - File: `expense_tracker_v1.0.0.apk`
-- Size: ~[Size in MB]
+- Size: ~50MB
 - Minimum Android Version: Android 5.0+
 - Target Android Version: Android 13+
 
