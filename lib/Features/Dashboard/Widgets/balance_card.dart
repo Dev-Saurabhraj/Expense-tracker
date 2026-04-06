@@ -66,7 +66,7 @@ class BalanceCard extends StatelessWidget {
           ),
           child: Icon(
             isIncome ? AppIcons.income : AppIcons.expense,
-            color: AppColors.surface,
+            color: (isIncome)? AppColors.income : AppColors.expense,
             size: 16,
           ),
         ),
