@@ -10,7 +10,9 @@ import '../../../Data/models/transaction_model.dart';
 import '../Bloc/transactions_bloc.dart';
 
 class AddTransactionScreen extends StatefulWidget {
-  const AddTransactionScreen({super.key});
+  final TransactionModel? transaction;
+
+  const AddTransactionScreen({super.key, this.transaction});
 
   @override
   State<AddTransactionScreen> createState() => _AddTransactionScreenState();
@@ -21,24 +23,62 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
   final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
-  
-  TransactionType _selectedType = TransactionType.expense;
-  String _selectedCategory = 'Food';
 
-  final List<String> _categories = ['Food', 'Transport', 'Shopping', 'Bills', 'Salary', 'Other'];
+  late TransactionType _selectedType;
+  late String _selectedCategory;
+  late DateTime _selectedDate;
+  late bool _isEditMode;
+
+  final List<String> _categories = [
+    'Food',
+    'Transport',
+    'Shopping',
+    'Bills',
+    'Salary',
+    'Other',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _isEditMode = widget.transaction != null;
+
+    if (_isEditMode) {
+      final tx = widget.transaction!;
+      _titleController.text = tx.title;
+      _amountController.text = tx.amount.toString();
+      _notesController.text = tx.notes;
+      _selectedType = tx.type;
+      _selectedCategory = tx.category;
+      _selectedDate = tx.date;
+    } else {
+      _selectedType = TransactionType.expense;
+      _selectedCategory = 'Food';
+      _selectedDate = DateTime.now();
+    }
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    _amountController.dispose();
+    _notesController.dispose();
+    super.dispose();
+  }
 
   void _saveTransaction() {
     if (_formKey.currentState!.validate()) {
+      final tx = _isEditMode ? widget.transaction! : null;
       final newTx = TransactionModel(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
+        id: tx?.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
         title: _titleController.text,
         amount: double.parse(_amountController.text),
         type: _selectedType,
         category: _selectedCategory,
-        date: DateTime.now(),
+        date: tx?.date ?? _selectedDate,
         notes: _notesController.text,
       );
-      
+
       context.read<TransactionsBloc>().add(AddTransaction(newTx));
       context.pop();
     }
@@ -51,7 +91,10 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.background,
         elevation: 0,
-        title: Text('New Transaction', style: AppTextStyles.h2),
+        title: Text(
+          _isEditMode ? 'Edit Transaction' : 'New Transaction',
+          style: AppTextStyles.h2,
+        ),
         leading: const BackButton(color: AppColors.textPrimary),
       ),
       body: SingleChildScrollView(
@@ -67,7 +110,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     child: _TypeSelector(
                       title: 'Expense',
                       isSelected: _selectedType == TransactionType.expense,
-                      onTap: () => setState(() => _selectedType = TransactionType.expense),
+                      onTap: () => setState(
+                        () => _selectedType = TransactionType.expense,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
@@ -75,7 +120,9 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
                     child: _TypeSelector(
                       title: 'Income',
                       isSelected: _selectedType == TransactionType.income,
-                      onTap: () => setState(() => _selectedType = TransactionType.income),
+                      onTap: () => setState(
+                        () => _selectedType = TransactionType.income,
+                      ),
                     ),
                   ),
                 ],
@@ -84,16 +131,21 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               CustomTextField(
                 controller: _titleController,
                 hintText: 'Title',
-                validator: (val) => val == null || val.isEmpty ? 'Please enter a title' : null,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Please enter a title' : null,
               ),
               const SizedBox(height: 16),
               CustomTextField(
                 controller: _amountController,
                 hintText: 'Amount',
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 validator: (val) {
-                  if (val == null || val.isEmpty) return 'Please enter an amount';
-                  if (double.tryParse(val) == null) return 'Please enter a valid number';
+                  if (val == null || val.isEmpty)
+                    return 'Please enter an amount';
+                  if (double.tryParse(val) == null)
+                    return 'Please enter a valid number';
                   return null;
                 },
               ),
@@ -107,7 +159,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
               ),
               const SizedBox(height: 48),
               CustomButton(
-                text: 'Save Transaction',
+                text: _isEditMode ? 'Update Transaction' : 'Save Transaction',
                 onPressed: _saveTransaction,
               ),
             ],
@@ -132,10 +184,7 @@ class _AddTransactionScreenState extends State<AddTransactionScreen> {
           dropdownColor: AppColors.surface,
           style: AppTextStyles.bodyLarge,
           items: _categories.map((String value) {
-            return DropdownMenuItem<String>(
-              value: value,
-              child: Text(value),
-            );
+            return DropdownMenuItem<String>(value: value, child: Text(value));
           }).toList(),
           onChanged: (newValue) {
             setState(() {
@@ -153,7 +202,11 @@ class _TypeSelector extends StatelessWidget {
   final bool isSelected;
   final VoidCallback onTap;
 
-  const _TypeSelector({required this.title, required this.isSelected, required this.onTap});
+  const _TypeSelector({
+    required this.title,
+    required this.isSelected,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +217,9 @@ class _TypeSelector extends StatelessWidget {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.primary : AppColors.surface,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: isSelected ? AppColors.primary : AppColors.border),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border,
+          ),
         ),
         alignment: Alignment.center,
         child: Text(

@@ -24,3 +24,23 @@ class DeleteTransaction extends TransactionsEvent {
   @override
   List<Object> get props => [id];
 }
+
+class SearchTransactions extends TransactionsEvent {
+  final String query;
+  const SearchTransactions(this.query);
+
+  @override
+  List<Object> get props => [query];
+}
+
+class FilterByCategory extends TransactionsEvent {
+  final List<String> categories;
+  const FilterByCategory(this.categories);
+
+  @override
+  List<Object> get props => [categories];
+}
+
+class ClearFilters extends TransactionsEvent {
+  const ClearFilters();
+}

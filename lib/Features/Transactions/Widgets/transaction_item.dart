@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import '../../../../Core/Colors/app_colors.dart';
-import '../../../../Core/Constants/text_styles.dart';
-import '../../../../Core/Icons/app_icons.dart';
-import '../../../../Core/Widgets/custom_card.dart';
-import '../../../../Data/models/transaction_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../Core/Colors/app_colors.dart';
+import '../../../Core/Constants/text_styles.dart';
+import '../../../Core/Icons/app_icons.dart';
+import '../../../Core/Widgets/custom_card.dart';
+import '../../../Data/models/transaction_model.dart';
+import '../Bloc/transactions_bloc.dart';
 
 class TransactionItem extends StatefulWidget {
   final TransactionModel transaction;
@@ -55,6 +58,33 @@ class _TransactionItemState extends State<TransactionItem> {
     }
   }
 
+  void _showDeleteConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: Text('Delete Transaction', style: AppTextStyles.h3),
+        content: Text(
+          'Are you sure you want to delete this transaction?',
+          style: AppTextStyles.bodyMedium,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: Text('Cancel', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () {
+              context.read<TransactionsBloc>().add(DeleteTransaction(widget.transaction.id));
+              context.pop();
+            },
+            child: Text('Delete', style: AppTextStyles.bodyLarge.copyWith(color: AppColors.expense)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final tx = widget.transaction;
@@ -64,21 +94,23 @@ class _TransactionItemState extends State<TransactionItem> {
 
     return CustomCard(
       padding: EdgeInsets.zero,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(20),
-        onTap: () {
-          if (tx.notes.trim().isNotEmpty) {
-            setState(() {
-              _isExpanded = !_isExpanded;
-            });
-          }
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            children: [
-              Row(
-                children: [
+      child: GestureDetector(
+        onLongPress: () => _showDeleteConfirmation(context),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            if (tx.notes.trim().isNotEmpty) {
+              setState(() {
+                _isExpanded = !_isExpanded;
+              });
+            }
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              children: [
+                Row(
+                  children: [
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
@@ -117,9 +149,43 @@ class _TransactionItemState extends State<TransactionItem> {
                       ],
                     ),
                   ),
-                  Text(
-                    '$prefix\$${tx.amount.toStringAsFixed(2)}',
-                    style: AppTextStyles.h3.copyWith(color: color),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '$prefix\$${tx.amount.toStringAsFixed(2)}',
+                        style: AppTextStyles.h3.copyWith(color: color),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            height: 32,
+                            width: 32,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 18,
+                              icon: Icon(Icons.edit, color: AppColors.textSecondary),
+                              onPressed: () {
+                                context.push('/edit-transaction', extra: tx);
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          SizedBox(
+                            height: 32,
+                            width: 32,
+                            child: IconButton(
+                              padding: EdgeInsets.zero,
+                              iconSize: 18,
+                              icon: Icon(Icons.delete_outline, color: AppColors.expense),
+                              onPressed: () => _showDeleteConfirmation(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -154,6 +220,6 @@ class _TransactionItemState extends State<TransactionItem> {
           ),
         ),
       ),
-    );
+    ));
   }
 }

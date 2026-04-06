@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 enum TransactionType { income, expense }
 
 class TransactionModel extends Equatable {
-  // Maximum amount limit to prevent overflow
+
   static const double maxAmount = 999999.99;
 
   final String id;

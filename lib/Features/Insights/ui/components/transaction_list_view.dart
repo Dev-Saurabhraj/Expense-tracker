@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import '../../../../Core/Colors/app_colors.dart';
 import '../../../../Core/Constants/text_styles.dart';
 import '../../../../Data/models/transaction_model.dart';
-import '../../../Transactions/ui/widgets/transaction_item.dart';
+import '../../../Transactions/widgets/transaction_item.dart';
 
 /// Widget for displaying a list of transactions with animations
 class TransactionListView extends StatelessWidget {
