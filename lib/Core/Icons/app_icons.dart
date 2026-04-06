@@ -15,8 +15,6 @@ class AppIcons {
   static const IconData search = Icons.search_rounded;
   static const IconData income = Icons.arrow_upward_rounded;
   static const IconData expense = Icons.arrow_downward_rounded;
-  
-  // Category Icons
   static const IconData food = Icons.restaurant_rounded;
   static const IconData transport = Icons.directions_car_rounded;
   static const IconData shopping = Icons.shopping_bag_rounded;

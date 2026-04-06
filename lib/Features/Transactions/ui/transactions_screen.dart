@@ -51,7 +51,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
               final String searchQuery = state.searchQuery;
               final List<String> selectedCategories = state.selectedCategories;
 
-              // Build filtered list display
               final totalItems = transactions.length;
               final totalPages = totalItems == 0
                   ? 1
@@ -65,13 +64,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
               return Column(
                 children: [
-                  // ── Search Bar ──────────────────────────────────────────
+
                   const TransactionSearchBar(),
-
-                  // ── Category Filter Chips ────────────────────────────────
                   const TransactionCategoryFilter(),
-
-                  // ── Results Counter ──────────────────────────────────────
                   if (searchQuery.isNotEmpty || selectedCategories.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.symmetric(
@@ -89,7 +84,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       ),
                     ),
 
-                  // ── Empty State or Transaction List ─────────────────────
                   if (transactions.isEmpty)
                     Expanded(
                       child: Center(

@@ -135,13 +135,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
         elevation: 0,
         title: Text('Insights', style: AppTextStyles.h2),
         actions: [
-          // ── Period Filter Buttons ────────────────────────────────────
+
           PopupMenuButton<InsightsPeriod>(
             icon: const Icon(Icons.filter_list, color: AppColors.textPrimary),
             onSelected: (period) {
               setState(() {
                 _selectedPeriod = period;
-                _activeIndex = 0; // Reset active index
+                _activeIndex = 0;
                 _currentPage = 1;
               });
               context.read<InsightsBloc>().add(FilterByPeriod(period));
@@ -326,8 +326,6 @@ class _InsightsScreenState extends State<InsightsScreen> {
                     ),
                   ),
                 ),
-
-                // ── Category Filter Chips ────────────────────────────────────
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -409,7 +407,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ),
                 ),
 
-                // ── Chart card ───────────────────────────────────────────────
+
                 SliverToBoxAdapter(
                   child: CustomCard(
                     margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -537,7 +535,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                           ),
                         ),
 
-                        // ── Pill-shaped vertical selection indicator ─────────
+
                         Positioned(
                           top: 20,
                           bottom: _labelsReservedHeight - 15,
@@ -607,7 +605,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ),
                 ),
 
-                // ── Transactions header ──────────────────────────────────────
+
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
@@ -625,7 +623,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ),
                 ),
 
-                // ── Transaction list ─────────────────────────────────────────
+
                 if (activeTransactions.isEmpty)
                   SliverToBoxAdapter(
                     child: Center(
@@ -731,7 +729,6 @@ class _InsightsScreenState extends State<InsightsScreen> {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
 
   List<TransactionModel> _getPaginatedTransactions(
     List<TransactionModel> transactions,

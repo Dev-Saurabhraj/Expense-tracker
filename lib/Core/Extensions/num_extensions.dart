@@ -1,11 +1,11 @@
 import '../Utils/number_utils.dart';
 
-/// Number extension methods for formatting and calculations
+
 extension NumExtensions on num {
-  /// Convert to currency string
+
   String get toCurrency => NumberUtils.toCurrency(toDouble());
 
-  /// Format with commas (e.g., 1000 -> "1,000")
+
   String get formatted => NumberUtils.formatWithCommas(toDouble());
 
   /// Format as currency with commas

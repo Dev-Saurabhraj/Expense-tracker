@@ -34,14 +34,14 @@ class TransactionCategoryFilter extends StatelessWidget {
         try {
           return SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding:  EdgeInsets.symmetric(horizontal: 12),
             child: Row(
               children: [
-                const SizedBox(width: 4),
+                 SizedBox(width: 4),
                 ...categories.map((category) {
                   final isSelected = selectedCategories.contains(category);
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    padding:  EdgeInsets.symmetric(horizontal: 4),
                     child: FilterChip(
                       label: Text(category),
                       selected: isSelected,
@@ -88,7 +88,7 @@ class TransactionCategoryFilter extends StatelessWidget {
                     ),
                   );
                 }).toList(),
-                const SizedBox(width: 4),
+                 SizedBox(width: 4),
               ],
             ),
           );

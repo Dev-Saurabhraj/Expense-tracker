@@ -48,6 +48,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 padding: const EdgeInsets.all(24.0),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
+
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: AnimationConfiguration.toStaggeredList(
                     duration: const Duration(milliseconds: 375),

@@ -1,4 +1,4 @@
-/// Custom exception classes for the application
+// custom exception
 abstract class AppException implements Exception {
   final String message;
   final String? code;
@@ -10,20 +10,18 @@ abstract class AppException implements Exception {
   String toString() => message;
 }
 
-/// Exception thrown when data is not found
+// no data exception
 class NotFoundException extends AppException {
   NotFoundException({
-    required String message,
+    required super.message,
     String? code,
-    Exception? originalException,
+    super.originalException,
   }) : super(
-         message: message,
          code: code ?? 'NOT_FOUND',
-         originalException: originalException,
        );
 }
 
-/// Exception thrown due to network errors
+// network error
 class NetworkException extends AppException {
   NetworkException({
     required String message,
@@ -36,7 +34,7 @@ class NetworkException extends AppException {
        );
 }
 
-/// Exception thrown due to parsing errors
+//parse error
 class ParseException extends AppException {
   ParseException({
     required String message,
@@ -49,7 +47,7 @@ class ParseException extends AppException {
        );
 }
 
-/// Exception thrown due to database errors
+//database error
 class DatabaseException extends AppException {
   DatabaseException({
     required String message,
@@ -62,7 +60,7 @@ class DatabaseException extends AppException {
        );
 }
 
-/// Exception thrown for unauthorized access
+//authentication error
 class UnauthorizedException extends AppException {
   UnauthorizedException({
     required String message,
@@ -75,7 +73,7 @@ class UnauthorizedException extends AppException {
        );
 }
 
-/// Exception thrown for invalid input
+// invalid input
 class ValidationException extends AppException {
   ValidationException({
     required String message,
@@ -88,7 +86,7 @@ class ValidationException extends AppException {
        );
 }
 
-/// Generic exception for unknown errors
+//unknown exception
 class UnknownException extends AppException {
   UnknownException({
     required String message,
