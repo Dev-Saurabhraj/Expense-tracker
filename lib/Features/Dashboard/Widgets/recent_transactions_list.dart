@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import '../../../../Core/Constants/text_styles.dart';
-import '../../Transactions/ui/widgets/transaction_item.dart';
+import '../../Transactions/widgets/transaction_item.dart';
 import '../../../../Data/models/transaction_model.dart';
 
 class RecentTransactionsList extends StatelessWidget {

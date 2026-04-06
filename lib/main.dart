@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'Core/Colors/app_colors.dart';
 import 'Data/repositories/finance_repository.dart';
@@ -11,17 +10,7 @@ import 'Router/goRouter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
-  
-  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-    statusBarColor: Colors.transparent,
-    statusBarIconBrightness: Brightness.dark,
-    systemNavigationBarColor: AppColors.surface,
-    systemNavigationBarIconBrightness: Brightness.dark,
-  ));
-
   final financeRepository = FinanceRepository();
-
   runApp(ExpenseTrackerApp(repository: financeRepository));
 }
 
@@ -53,7 +42,6 @@ class ExpenseTrackerApp extends StatelessWidget {
         theme: ThemeData(
           scaffoldBackgroundColor: AppColors.background,
           colorScheme: ColorScheme.fromSeed(seedColor: AppColors.primary),
-          useMaterial3: true,
           appBarTheme: const AppBarTheme(
             backgroundColor: AppColors.background,
             elevation: 0,

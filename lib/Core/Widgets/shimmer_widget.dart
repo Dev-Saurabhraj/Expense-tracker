@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../Colors/app_colors.dart';
 
-/// Shimmer effect widget for loading states
 class ShimmerWidget extends StatefulWidget {
   final double width;
   final double height;
@@ -68,7 +67,7 @@ class _ShimmerWidgetState extends State<ShimmerWidget>
   }
 }
 
-/// Shimmer loading list tile
+
 class ShimmerListTile extends StatelessWidget {
   final BorderRadius? borderRadius;
 

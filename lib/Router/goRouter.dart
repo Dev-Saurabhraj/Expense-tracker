@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../Data/models/transaction_model.dart';
 import '../Features/Dashboard/Bloc/dashboard_bloc.dart';
 import '../Features/Dashboard/ui/dashboard_screen.dart';
 import '../Features/Goals/Bloc/goals_bloc.dart';
@@ -15,10 +16,14 @@ import '../Features/Transactions/ui/transactions_screen.dart';
 import 'routerConstant.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
-final GlobalKey<NavigatorState> _shellNavigatorDashboardKey = GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
-final GlobalKey<NavigatorState> _shellNavigatorTransactionsKey = GlobalKey<NavigatorState>(debugLabel: 'shellTransactions');
-final GlobalKey<NavigatorState> _shellNavigatorGoalsKey = GlobalKey<NavigatorState>(debugLabel: 'shellGoals');
-final GlobalKey<NavigatorState> _shellNavigatorInsightsKey = GlobalKey<NavigatorState>(debugLabel: 'shellInsights');
+final GlobalKey<NavigatorState> _shellNavigatorDashboardKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellDashboard');
+final GlobalKey<NavigatorState> _shellNavigatorTransactionsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellTransactions');
+final GlobalKey<NavigatorState> _shellNavigatorGoalsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellGoals');
+final GlobalKey<NavigatorState> _shellNavigatorInsightsKey =
+    GlobalKey<NavigatorState>(debugLabel: 'shellInsights');
 
 final GoRouter appRouter = GoRouter(
   navigatorKey: _rootNavigatorKey,
@@ -83,6 +88,14 @@ final GoRouter appRouter = GoRouter(
       path: RouterConstants.addTransaction,
       parentNavigatorKey: _rootNavigatorKey,
       builder: (context, state) => const AddTransactionScreen(),
+    ),
+    GoRoute(
+      path: '/edit-transaction',
+      parentNavigatorKey: _rootNavigatorKey,
+      builder: (context, state) {
+        final transaction = state.extra as TransactionModel?;
+        return AddTransactionScreen(transaction: transaction);
+      },
     ),
   ],
 );

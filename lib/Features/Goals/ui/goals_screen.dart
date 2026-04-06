@@ -58,11 +58,6 @@ class GoalsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        title: Text('Savings Challenge', style: AppTextStyles.h2),
-      ),
       body: BlocBuilder<GoalsBloc, GoalsState>(
         builder: (context, state) {
           if (state is GoalsLoading) {
@@ -75,92 +70,95 @@ class GoalsScreen extends StatelessWidget {
             double progress = target > 0 ? (savings / target).clamp(0.0, 1.0) : 0;
             String header = goal == null ? 'Ready for a Challenge?' : 'Monthly Progress';
 
-            return Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(header, style: AppTextStyles.h2),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Track your income against expenses to build a savings streak.',
-                    style: AppTextStyles.bodyMedium,
-                  ),
-                  const SizedBox(height: 32),
-                  CustomCard(
-                    padding: const EdgeInsets.all(24),
-                    child: Column(
-                      children: [
-                        if (goal != null) ...[
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              SizedBox(
-                                width: 180,
-                                height: 180,
-                                child: CircularProgressIndicator(
-                                  value: progress > 0 ? progress : 0.01,
-                                  backgroundColor: AppColors.goalTrack,
-                                  color: AppColors.goalProgress,
-                                  strokeWidth: 12,
-                                  strokeCap: StrokeCap.round,
-                                ),
-                              ),
-                              Column(
-                                children: [
-                                  Text(
-                                    '${(progress * 100).toStringAsFixed(0)}%',
-                                    style: AppTextStyles.h1,
-                                  ),
-                                  Text('Saved', style: AppTextStyles.bodyMedium),
-                                ],
-                              )
-                            ],
-                          ),
-                          const SizedBox(height: 32),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text('Current', style: AppTextStyles.bodySmall),
-                                  Text('\$${savings.toStringAsFixed(2)}', style: AppTextStyles.h3),
-                                ],
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text('Target', style: AppTextStyles.bodySmall),
-                                  Text('\$${target.toStringAsFixed(2)}', style: AppTextStyles.h3),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 24),
-                          CustomButton(
-                            text: 'Update Challenge Target',
-                            isOutlined: true,
-                            onPressed: () => _showSetGoalDialog(context, savings, goal),
-                          ),
-                        ] else ...[
-                          Icon(Icons.emoji_events_rounded, size: 64, color: AppColors.textTertiary),
-                          const SizedBox(height: 16),
-                          Text(
-                            'You currently have no active monthly goal. Set one up to keep your savings on track!',
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.bodyLarge,
-                          ),
-                          const SizedBox(height: 24),
-                          CustomButton(
-                            text: 'Set Goal',
-                            onPressed: () => _showSetGoalDialog(context, savings),
-                          ),
-                        ],
-                      ],
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(header, style: AppTextStyles.h2),
+
+                    const SizedBox(height: 22),
+                    Text(
+                      'Track your income against expenses to build a savings streak.',
+                      style: AppTextStyles.bodyMedium,
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 32),
+                    CustomCard(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        children: [
+                          if (goal != null) ...[
+                            Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                SizedBox(
+                                  width: 180,
+                                  height: 180,
+                                  child: CircularProgressIndicator(
+                                    value: progress > 0 ? progress : 0.01,
+                                    backgroundColor: AppColors.goalTrack,
+                                    color: AppColors.goalProgress,
+                                    strokeWidth: 12,
+                                    strokeCap: StrokeCap.round,
+                                  ),
+                                ),
+                                Column(
+                                  children: [
+                                    Text(
+                                      '${(progress * 100).toStringAsFixed(0)}%',
+                                      style: AppTextStyles.h1,
+                                    ),
+                                    Text('Saved', style: AppTextStyles.bodyMedium),
+                                  ],
+                                )
+                              ],
+                            ),
+                            const SizedBox(height: 32),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Current', style: AppTextStyles.bodySmall),
+                                    Text('\$${savings.toStringAsFixed(2)}', style: AppTextStyles.h3),
+                                  ],
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text('Target', style: AppTextStyles.bodySmall),
+                                    Text('\$${target.toStringAsFixed(2)}', style: AppTextStyles.h3),
+                                  ],
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+                            CustomButton(
+                              text: 'Update Challenge Target',
+                              isOutlined: true,
+                              onPressed: () => _showSetGoalDialog(context, savings, goal),
+                            ),
+                          ] else ...[
+                            Icon(Icons.emoji_events_rounded, size: 64, color: AppColors.textTertiary),
+                            const SizedBox(height: 16),
+                            Text(
+                              'You currently have no active monthly goal. Set one up to keep your savings on track!',
+                              textAlign: TextAlign.center,
+                              style: AppTextStyles.bodyLarge,
+                            ),
+                            const SizedBox(height: 24),
+                            CustomButton(
+                              text: 'Set Goal',
+                              onPressed: () => _showSetGoalDialog(context, savings),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }

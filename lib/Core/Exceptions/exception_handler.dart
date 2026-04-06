@@ -22,27 +22,27 @@ class ExceptionHandler {
           errorString.contains('HttpException')) {
         return NetworkException(
           message: message ?? 'Network error occurred',
-          originalException: error as Exception,
+          originalException: error,
         );
       }
 
       if (errorString.contains('404')) {
         return NotFoundException(
           message: message ?? 'Resource not found',
-          originalException: error as Exception,
+          originalException: error,
         );
       }
 
       if (errorString.contains('401') || errorString.contains('403')) {
         return UnauthorizedException(
           message: message ?? 'Unauthorized access',
-          originalException: error as Exception,
+          originalException: error,
         );
       }
 
       return UnknownException(
         message: message ?? error.toString(),
-        originalException: error as Exception,
+        originalException: error,
       );
     }
 
