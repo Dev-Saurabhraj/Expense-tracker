@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
-import '../../../../Core/Colors/app_colors.dart';
-import '../../../../Core/Widgets/custom_card.dart';
+import '../../../Core/Widgets/custom_card.dart';
 
 class ShimmerTransactionList extends StatelessWidget {
   final int itemCount;
