@@ -16,12 +16,16 @@ class InsightsLoaded extends InsightsState {
   final List<DateTime> sortedDays;
   final List<String> weekLabels;
   final List<TransactionModel> transactions;
+  final String? selectedCategory;
+  final InsightsPeriod selectedPeriod;
 
   const InsightsLoaded({
     required this.dailyExpenses,
     required this.sortedDays,
     required this.weekLabels,
     required this.transactions,
+    this.selectedCategory,
+    this.selectedPeriod = InsightsPeriod.monthly,
   });
 
   @override
@@ -30,6 +34,8 @@ class InsightsLoaded extends InsightsState {
     sortedDays,
     weekLabels,
     transactions,
+    selectedCategory ?? '',
+    selectedPeriod,
   ];
 }
 

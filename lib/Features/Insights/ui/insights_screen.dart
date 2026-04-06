@@ -6,7 +6,7 @@ import '../../../Core/Colors/app_colors.dart';
 import '../../../Core/Constants/text_styles.dart';
 import '../../../Core/Widgets/custom_card.dart';
 import '../../../Data/models/transaction_model.dart';
-import '../../Transactions/ui/widgets/transaction_item.dart';
+import '../../Transactions/widgets/transaction_item.dart';
 import '../Bloc/insights_bloc.dart';
 
 /// Holds the result of the mathematical intersection computation.
@@ -52,6 +52,18 @@ class _InsightsScreenState extends State<InsightsScreen> {
   static const double _drawingAreaHeight =
       _chartTotalHeight - _labelsReservedHeight; // 200 px
 
+  // ── Filters ────────────────────────────────────────────────────────────────
+  InsightsPeriod _selectedPeriod = InsightsPeriod.monthly;
+  String? _selectedCategory;
+  final List<String> _categories = [
+    'Food',
+    'Transport',
+    'Shopping',
+    'Bills',
+    'Salary',
+    'Other',
+  ];
+
   // ── Life-cycle ────────────────────────────────────────────────────────────
 
   @override
@@ -86,14 +98,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
   }
 
   //
-  _IntersectionResult _computeIntersection(
-    List<double> expenses,
-    double maxY,
-  ) {
+  _IntersectionResult _computeIntersection(List<double> expenses, double maxY) {
     // Exact fractional index where the viewport center sits.
     final double exactIndex = _scrollController.hasClients
-        ? (_scrollController.offset / _pointSpacing)
-            .clamp(0.0, (expenses.length - 1).toDouble())
+        ? (_scrollController.offset / _pointSpacing).clamp(
+            0.0,
+            (expenses.length - 1).toDouble(),
+          )
         : _activeIndex.toDouble();
 
     final int lower = exactIndex.floor().clamp(0, expenses.length - 1);
@@ -103,15 +114,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
     final double yData = (lower == upper)
         ? expenses[lower]
         : expenses[lower] +
-            (expenses[upper] - expenses[lower]) * (exactIndex - lower);
+              (expenses[upper] - expenses[lower]) * (exactIndex - lower);
 
     // Map from data space → pixel space.
     final double topPx = _drawingAreaHeight * (1.0 - yData / maxY);
 
     return _IntersectionResult(yData: yData, topPx: topPx);
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -125,6 +134,97 @@ class _InsightsScreenState extends State<InsightsScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         title: Text('Insights', style: AppTextStyles.h2),
+        actions: [
+          // ── Period Filter Buttons ────────────────────────────────────
+          PopupMenuButton<InsightsPeriod>(
+            icon: const Icon(Icons.filter_list, color: AppColors.textPrimary),
+            onSelected: (period) {
+              setState(() {
+                _selectedPeriod = period;
+                _activeIndex = 0; // Reset active index
+                _currentPage = 1;
+              });
+              context.read<InsightsBloc>().add(FilterByPeriod(period));
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: InsightsPeriod.daily,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today,
+                      color: _selectedPeriod == InsightsPeriod.daily
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Daily',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: _selectedPeriod == InsightsPeriod.daily
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                        fontWeight: _selectedPeriod == InsightsPeriod.daily
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: InsightsPeriod.weekly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.date_range,
+                      color: _selectedPeriod == InsightsPeriod.weekly
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Weekly',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: _selectedPeriod == InsightsPeriod.weekly
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                        fontWeight: _selectedPeriod == InsightsPeriod.weekly
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: InsightsPeriod.monthly,
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.event_note,
+                      color: _selectedPeriod == InsightsPeriod.monthly
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      'Monthly',
+                      style: AppTextStyles.bodyLarge.copyWith(
+                        color: _selectedPeriod == InsightsPeriod.monthly
+                            ? AppColors.primary
+                            : AppColors.textPrimary,
+                        fontWeight: _selectedPeriod == InsightsPeriod.monthly
+                            ? FontWeight.w600
+                            : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: BlocBuilder<InsightsBloc, InsightsState>(
         builder: (context, state) {
@@ -152,15 +252,27 @@ class _InsightsScreenState extends State<InsightsScreen> {
                 FlSpot(i.toDouble(), expenses[i]),
             ];
 
-            // Transactions for the currently snapped month.
-            final activeMonthAnchor = months[_activeIndex];
-            final activeTransactions = transactions
-                .where(
-                  (tx) =>
-                      tx.date.year == activeMonthAnchor.year &&
-                      tx.date.month == activeMonthAnchor.month,
-                )
-                .toList();
+            // Transactions for the currently snapped period (day/week/month).
+            final activePeriodAnchor = months[_activeIndex];
+            final activeTransactions = transactions.where((tx) {
+              if (_selectedPeriod == InsightsPeriod.daily) {
+                // For daily: match exact day
+                return tx.date.year == activePeriodAnchor.year &&
+                    tx.date.month == activePeriodAnchor.month &&
+                    tx.date.day == activePeriodAnchor.day;
+              } else if (_selectedPeriod == InsightsPeriod.weekly) {
+                // For weekly: match week (Monday to Sunday)
+                final weekEnd = activePeriodAnchor.add(const Duration(days: 6));
+                return tx.date.isAfter(
+                      activePeriodAnchor.subtract(const Duration(seconds: 1)),
+                    ) &&
+                    tx.date.isBefore(weekEnd.add(const Duration(days: 1)));
+              } else {
+                // For monthly: match year and month
+                return tx.date.year == activePeriodAnchor.year &&
+                    tx.date.month == activePeriodAnchor.month;
+              }
+            }).toList();
 
             return CustomScrollView(
               physics: const BouncingScrollPhysics(),
@@ -181,7 +293,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                             style: AppTextStyles.bodySmall.copyWith(
                               color: AppColors.textSecondary,
                               letterSpacing: 1.4,
-                              fontSize: 18
+                              fontSize: 18,
                             ),
                           ),
                         ),
@@ -215,6 +327,88 @@ class _InsightsScreenState extends State<InsightsScreen> {
                   ),
                 ),
 
+                // ── Category Filter Chips ────────────────────────────────────
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          const SizedBox(width: 4),
+                          // Clear filter button
+                          if (_selectedCategory != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: FilterChip(
+                                label: const Text('Clear'),
+                                onSelected: (_) {
+                                  setState(() => _selectedCategory = null);
+                                  context.read<InsightsBloc>().add(
+                                    const FilterByCategory(null),
+                                  );
+                                },
+                                labelStyle: AppTextStyles.bodySmall.copyWith(
+                                  color: AppColors.surface,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                backgroundColor: AppColors.expense,
+                                selectedColor: AppColors.expense,
+                                side: BorderSide(color: AppColors.expense),
+                                checkmarkColor: AppColors.surface,
+                              ),
+                            ),
+                          // Category filter chips
+                          ..._categories.map((category) {
+                            final isSelected = _selectedCategory == category;
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 4,
+                              ),
+                              child: FilterChip(
+                                label: Text(category),
+                                selected: isSelected,
+                                onSelected: (_) {
+                                  setState(
+                                    () => _selectedCategory = isSelected
+                                        ? null
+                                        : category,
+                                  );
+                                  context.read<InsightsBloc>().add(
+                                    FilterByCategory(
+                                      isSelected ? null : category,
+                                    ),
+                                  );
+                                },
+                                labelStyle: AppTextStyles.bodySmall.copyWith(
+                                  color: isSelected
+                                      ? AppColors.surface
+                                      : AppColors.textPrimary,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                backgroundColor: AppColors.surface,
+                                selectedColor: AppColors.primary,
+                                side: BorderSide(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : AppColors.border,
+                                ),
+                                checkmarkColor: AppColors.surface,
+                              ),
+                            );
+                          }).toList(),
+                          const SizedBox(width: 4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+
                 // ── Chart card ───────────────────────────────────────────────
                 SliverToBoxAdapter(
                   child: CustomCard(
@@ -225,7 +419,6 @@ class _InsightsScreenState extends State<InsightsScreen> {
 
                       clipBehavior: Clip.none,
                       children: [
-
                         SingleChildScrollView(
                           controller: _scrollController,
                           scrollDirection: Axis.horizontal,
@@ -243,8 +436,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                   gridData: FlGridData(
                                     show: true,
                                     drawVerticalLine: false,
-                                    horizontalInterval:
-                                        maxY / 4 == 0 ? 1 : maxY / 4,
+                                    horizontalInterval: maxY / 4 == 0
+                                        ? 1
+                                        : maxY / 4,
                                     getDrawingHorizontalLine: (_) => FlLine(
                                       color: AppColors.border.withValues(
                                         alpha: 0.45,
@@ -255,16 +449,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                   titlesData: FlTitlesData(
                                     show: true,
                                     rightTitles: const AxisTitles(
-                                      sideTitles:
-                                          SideTitles(showTitles: false),
+                                      sideTitles: SideTitles(showTitles: false),
                                     ),
                                     topTitles: const AxisTitles(
-                                      sideTitles:
-                                          SideTitles(showTitles: false),
+                                      sideTitles: SideTitles(showTitles: false),
                                     ),
                                     leftTitles: const AxisTitles(
-                                      sideTitles:
-                                          SideTitles(showTitles: false),
+                                      sideTitles: SideTitles(showTitles: false),
                                     ),
                                     bottomTitles: AxisTitles(
                                       sideTitles: SideTitles(
@@ -274,7 +465,8 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                         getTitlesWidget: (value, meta) {
                                           final int index = value.toInt();
                                           if (index < 0 ||
-                                              index >= state.weekLabels.length) {
+                                              index >=
+                                                  state.weekLabels.length) {
                                             return const SizedBox.shrink();
                                           }
                                           final bool isActive =
@@ -284,12 +476,13 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                             space: 15,
                                             child: AnimatedContainer(
                                               duration: const Duration(
-                                                  milliseconds: 300),
+                                                milliseconds: 300,
+                                              ),
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                horizontal: 12,
-                                                vertical: 3,
-                                              ),
+                                                    horizontal: 12,
+                                                    vertical: 3,
+                                                  ),
                                               decoration: BoxDecoration(
                                                 color: isActive
                                                     ? Colors.black
@@ -301,15 +494,17 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                                 state.weekLabels[index],
                                                 style: AppTextStyles.bodySmall
                                                     .copyWith(
-                                                  color: isActive
-                                                      ? Colors.white
-                                                      : AppColors.textSecondary,
-                                                  fontWeight: isActive
-                                                      ? FontWeight.bold
-                                                      : FontWeight.normal,
-                                                  fontSize:
-                                                      isActive ? 13 : 12,
-                                                ),
+                                                      color: isActive
+                                                          ? Colors.white
+                                                          : AppColors
+                                                                .textSecondary,
+                                                      fontWeight: isActive
+                                                          ? FontWeight.bold
+                                                          : FontWeight.normal,
+                                                      fontSize: isActive
+                                                          ? 13
+                                                          : 12,
+                                                    ),
                                               ),
                                             ),
                                           );
@@ -333,8 +528,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                       dotData: const FlDotData(show: false),
                                     ),
                                   ],
-                                  lineTouchData:
-                                      const LineTouchData(enabled: false),
+                                  lineTouchData: const LineTouchData(
+                                    enabled: false,
+                                  ),
                                 ),
                               ),
                             ),
@@ -344,7 +540,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                         // ── Pill-shaped vertical selection indicator ─────────
                         Positioned(
                           top: 20,
-                          bottom: _labelsReservedHeight -15,
+                          bottom: _labelsReservedHeight - 15,
                           child: Container(
                             width: 32,
                             decoration: BoxDecoration(
@@ -378,7 +574,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     // Value badge
-                                    SizedBox(height: 35,),
+                                    SizedBox(height: 35),
 
                                     Container(
                                       width: dotDiameter,
@@ -392,8 +588,9 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                         ),
                                         boxShadow: [
                                           BoxShadow(
-                                            color: AppColors.primary
-                                                .withValues(alpha: 0.3),
+                                            color: AppColors.primary.withValues(
+                                              alpha: 0.3,
+                                            ),
                                             blurRadius: 8,
                                           ),
                                         ],
@@ -477,8 +674,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                               children: [
                                 ElevatedButton.icon(
                                   onPressed: _currentPage > 1
-                                      ? () =>
-                                          setState(() => _currentPage--)
+                                      ? () => setState(() => _currentPage--)
                                       : null,
                                   icon: const Icon(Icons.chevron_left),
                                   label: const Text('Previous'),
@@ -502,15 +698,16 @@ class _InsightsScreenState extends State<InsightsScreen> {
                                 ),
                                 const SizedBox(width: 16),
                                 ElevatedButton.icon(
-                                  onPressed: _currentPage <
+                                  onPressed:
+                                      _currentPage <
                                           _getTotalPages(activeTransactions)
-                                      ? () =>
-                                          setState(() => _currentPage++)
+                                      ? () => setState(() => _currentPage++)
                                       : null,
                                   icon: const Icon(Icons.chevron_right),
                                   label: const Text('Next'),
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: _currentPage <
+                                    backgroundColor:
+                                        _currentPage <
                                             _getTotalPages(activeTransactions)
                                         ? AppColors.primary
                                         : AppColors.border,
